@@ -1,0 +1,4 @@
+// RUN: ${TEST_RUNNER_CMD} ${BUILD}/samples/simple_vec_mul/simple_int_vec_mul_bytecode_static
+// RUN: ${TEST_RUNNER_CMD} ${BUILD}/samples/simple_vec_mul/simple_int_vec_mul_emitc_static
+// RUN: ${TEST_RUNNER_CMD} ${BUILD}/samples/simple_vec_mul/simple_float_vec_mul_bytecode_static
+// RUN: ${TEST_RUNNER_CMD} ${BUILD}/samples/simple_vec_mul/simple_float_vec_mul_emitc_static

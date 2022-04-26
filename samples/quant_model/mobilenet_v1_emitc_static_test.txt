@@ -1,0 +1,3 @@
+// RUN: ${TEST_RUNNER_CMD} ${BUILD}/samples/quant_model/mobilenet_v1_emitc_static 2>&1 | tee %t
+// RUN: cat %t | FileCheck %s
+// CHECK: {{Image prediction result is: id: 178}}

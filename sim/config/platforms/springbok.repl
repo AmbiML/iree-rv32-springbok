@@ -1,0 +1,38 @@
+// Copyright 2022 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+// ***************************************************
+// Springbok
+// ***************************************************
+
+cpu2: CPU.SpringbokRiscV32 @ sysbus
+    hartId: 2
+
+//RAM_VEC_IMEM      [‘h3200_0000 - ‘h320F_FFFF) 1MB RAM for Vector core Instruction
+// Remember to update hart_is_vc in rom_crt.S if this changes.
+ram_vec_imem: Memory.MappedMemory @ sysbus 0x32000000
+    size: 0x00100000
+
+//RAM_VEC_DMEM      [‘h3400_0000 - ‘h34FF_FFFF)   16MB RAM for Vector core Data
+ram_vec_dmem: Memory.MappedMemory @ sysbus 0x34000000
+    size: 0x01000000
+
+//RAM_VEC_CSR       [‘h3800_0000 - ‘h3800_0FFF)   4KB RAM for Vector Core CSRs
+ram_vec_csr: Memory.MappedMemory @ sysbus 0x38000000
+    size: 0x00001000
+
+vec_controlblock : CPU.SpringbokRiscV32_ControlBlock @ sysbus 0x47000000
+    core: cpu2
+    imem: ram_vec_imem
+    dmem: ram_vec_dmem
