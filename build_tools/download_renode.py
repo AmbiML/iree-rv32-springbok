@@ -31,7 +31,7 @@ import wget
 def download_artifact(url, artifact_name, out_dir):
     """Download the artifact from url."""
     if not os.path.isdir(out_dir):
-        os.mkdir(out_dir)
+        os.makedirs(out_dir)
     out_file = os.path.join(out_dir, artifact_name)
     download_url = os.path.join(url, artifact_name)
     num_retries = 3
@@ -117,7 +117,7 @@ def main():
 
     renode_dir = Path(args.renode_dir)
     if not os.path.isdir(renode_dir):
-        os.mkdir(renode_dir)
+        os.makedirs(renode_dir)
     tag_file = renode_dir / "tag"
 
     # Check the tag of the existing download.
