@@ -41,7 +41,7 @@ echo "Download ${TOOLCHAIN_TARBALL} from GCS..."
 DOWNLOAD_URL="https://storage.googleapis.com/shodan-public-artifacts/${TOOLCHAIN_TARBALL}"
 mkdir -p "${DOWNLOAD_DIR}"
 
-wget -P "${DOWNLOAD_DIR}" "${DOWNLOAD_URL}"
+wget --progress=dot:giga -P "${DOWNLOAD_DIR}" "${DOWNLOAD_URL}"
 wget -P "${DOWNLOAD_DIR}" "${DOWNLOAD_URL}.sha256sum"
 pushd "${DOWNLOAD_DIR}" > /dev/null
 try sha256sum -c "${TOOLCHAIN_TARBALL}.sha256sum"
