@@ -13,4 +13,4 @@ jobs:
         run: pip install git+https://github.com/antmicro/tuttest
 
       - name: Run tuttest
-        run: tuttest README.md | bash -e -
+        run: tuttest README.md | grep -v sim_springbok | bash -e -
