@@ -1,0 +1,16 @@
+name: Springbok README tests
+on:
+  push:
+
+jobs:
+  test:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v2
+
+      - name: Install tuttest
+        run: pip install git+https://github.com/antmicro/tuttest
+
+      - name: Run tuttest
+        run: tuttest README.md | bash -e -
