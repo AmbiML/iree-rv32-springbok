@@ -11,9 +11,12 @@ Springbok, a RISC-V 32-bit bare-metal platform, and can be simulated with
 First install the system packages:
 
 ```bash
-sudo apt install xxd cmake ninja-build
-pip install lit wget
+sudo apt install xxd cmake ninja-build wget
+pip install -r python-requirements.txt
 ```
+
+**NOTE**: IREE requires CMake >= 3.17. If your system's default cmake is in an
+older version, please update it manually.
 
 To get you going we have pre-compiled an RV32 LLVM toolchain. This can be installed using:
 
@@ -38,6 +41,9 @@ Make sure your `${HOME}/.local/bin` is in your PATH:
 ```bash
 export PATH=${HOME}/.local/bin:${PATH}
 ```
+
+**NOTE**: If your python packages are installed with the virtual environment,
+please set PATH accordingly.
 
 ## Code structure
 
