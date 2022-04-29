@@ -284,7 +284,7 @@ namespace Antmicro.Renode.Peripherals.CPU
                         {
                             this.Log(LogLevel.Noisy, "Resetting core.");
                             Core.Reset();
-                            ulong startAddress = (val & ~(ulong)Mode.Mask) + Machine.SystemBus.GetRegistrationPoints(IMem).First().Range.StartAddress;
+                            ulong startAddress = (val & ~(ulong)Mode.Mask) + Machine.SystemBus.GetRegistrationPoints(IMem, Core).First().Range.StartAddress;
                             this.Log(LogLevel.Noisy, "Setting PC to 0x{0:X}.", startAddress);
                             Core.PC = startAddress;
                         }
