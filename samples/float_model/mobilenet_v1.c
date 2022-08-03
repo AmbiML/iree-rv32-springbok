@@ -18,12 +18,13 @@
 // MlModel struct initialization to include model I/O info.
 // Bytecode loading, input/output processes.
 
+#include "mobilenet_v1.h"
+
 #include <springbok.h>
 
 #include "iree/base/api.h"
 #include "iree/hal/api.h"
 #include "samples/util/util.h"
-#include "mobilenet_v1.h"
 
 // Compiled module embedded here to avoid file IO:
 #include "samples/float_model/mobilenet_input_c.h"
@@ -51,23 +52,25 @@ const MlModel kModel = {
 
 MobilenetV1Output score;
 
-iree_status_t create_module(iree_vm_module_t **module) {
+iree_status_t create_module(iree_vm_instance_t *instance,
+                            iree_vm_module_t **module) {
 #if !defined(BUILD_EMITC)
   const struct iree_file_toc_t *module_file_toc =
       samples_float_model_mobilenet_v1_bytecode_module_static_create();
   return iree_vm_bytecode_module_create(
+      instance,
       iree_make_const_byte_span(module_file_toc->data, module_file_toc->size),
       iree_allocator_null(), iree_allocator_system(), module);
 #else
-  return module_create(iree_allocator_system(), module);
+  return module_create(instance, iree_allocator_system(), module);
 #endif
 }
 
 iree_hal_executable_library_query_fn_t library_query(void) {
 #if !defined(BUILD_EMITC)
-  return &mobilenet_v1_bytecode_module_static_linked_llvm_library_query;
+  return &mobilenet_v1_bytecode_module_static_linked_llvm_cpu_library_query;
 #else
-  return &mobilenet_v1_c_module_static_linked_llvm_library_query;
+  return &mobilenet_v1_c_module_static_linked_llvm_cpu_library_query;
 #endif
 }
 

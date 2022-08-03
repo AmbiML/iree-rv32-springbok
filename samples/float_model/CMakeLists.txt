@@ -32,7 +32,7 @@ springbok_modules(
   NAME
     mnist
   SRC
-    "${CMAKE_SOURCE_DIR}/third_party/iree/iree/samples/models/mnist.mlir"
+    "${CMAKE_SOURCE_DIR}/third_party/iree/samples/models/mnist.mlir"
   C_IDENTIFIER
     "samples_float_model_mnist"
   FLAGS

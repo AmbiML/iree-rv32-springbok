@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-#ifndef SW_VEC_IREE_SAMPLES_UTIL_UTIL_H_
-#define SW_VEC_IREE_SAMPLES_UTIL_UTIL_H_
+#ifndef SAMPLES_UTIL_UTIL_H_
+#define SAMPLES_UTIL_UTIL_H_
 
 // A top-level header collection for ML executable utility library.
 
 #include "samples/util/alloc.h"
 #include "samples/util/model_api.h"
 
-#endif  // SW_VEC_IREE_SAMPLES_UTIL_UTIL_H_
+#endif  // SAMPLES_UTIL_UTIL_H_

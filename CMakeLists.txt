@@ -29,6 +29,9 @@ list(APPEND CMAKE_MODULE_PATH
 set(IREE_SOURCE_DIR "third_party/iree" CACHE PATH
     "IREE source code path. (default: third_party/iree/)")
 
+include_directories(BEFORE SYSTEM ${CMAKE_CURRENT_LIST_DIR})
+include_directories(BEFORE SYSTEM ${CMAKE_CURRENT_BINARY_DIR})
+
 # Use nano spec header and libraries.
 include_directories(BEFORE SYSTEM "${RISCV_TOOLCHAIN_ROOT}/riscv32-unknown-elf/include/newlib-nano/")
 link_directories(BEFORE "${RISCV_TOOLCHAIN_ROOT}/riscv32-unknown-elf/lib/newlib-nano/")
@@ -38,7 +41,7 @@ link_directories(BEFORE "${RISCV_TOOLCHAIN_ROOT}/riscv32-unknown-elf/lib/newlib-
 #-------------------------------------------------------------------------------
 set(DTCM_LENGTH "16M" CACHE STRING "DTCM Length (default: 16M)")
 add_link_options("LINKER:--defsym=__dtcm_length__=${DTCM_LENGTH}")
-set(ITCM_LENGTH "512K" CACHE STRING "ITCM (I-mem) Length (default: 512K)")
+set(ITCM_LENGTH "1M" CACHE STRING "ITCM (I-mem) Length (default: 1M)")
 add_link_options("LINKER:--defsym=__itcm_length__=${ITCM_LENGTH}")
 set(STACK_SIZE "10K" CACHE STRING "Stack size (default: 10K)")
 add_link_options("LINKER:--defsym=__stack_size__=${STACK_SIZE}")
@@ -54,9 +57,10 @@ set(IREE_BUILD_SAMPLES OFF)
 set(IREE_ENABLE_THREADING OFF)
 set(IREE_BUILD_TESTS OFF)
 set(IREE_BUILD_BINDINGS_TFLITE OFF)
+set(IREE_HAL_DRIVER_LOCAL_SYNC ON CACHE BOOL "" FORCE)
+set(IREE_HAL_EXECUTABLE_LOADER_DEFAULTS OFF CACHE BOOL "" FORCE)
+set(IREE_HAL_EXECUTABLE_LOADER_VMVX_MODULE ON CACHE BOOL "" FORCE)
 set(IREE_HAL_DRIVER_DEFAULTS OFF CACHE BOOL "" FORCE)
-set(IREE_HAL_DRIVER_VMVX_SYNC ON CACHE BOOL "" FORCE)
-set(IREE_HAL_DRIVER_DYLIB_SYNC ON CACHE BOOL "" FORCE)
 
 #-------------------------------------------------------------------------------
 # IREE-specific definitions
@@ -87,11 +91,19 @@ add_subdirectory(${IREE_SOURCE_DIR} iree)
 
 # Apply IREE's CMake variables and build options so we can use IREE build
 # functions properly in this project.
-include(${IREE_SOURCE_DIR}/build_tools/cmake/iree_copts.cmake)
+set(IREE_ROOT_DIR "${IREE_SOURCE_DIR}" CACHE PATH "IREE Root directory")
+include(springbok_ops)
 
 include(springbok_bytecode_module)
 include(springbok_c_module)
 include(springbok_modules)
 include(iree_model_input)
+# softmax op (and mfcc) requires floorf implementation in libm. Use the nano
+# version.
+find_library(m m
+PATHS
+  "${RISCV_TOOLCHAIN_ROOT}/riscv32-unknown-elf/lib/newlib-nano/"
+REQUIRED)
+link_libraries(m)
 # Add the included directory here.
 add_subdirectory(samples)
