@@ -43,15 +43,17 @@ const MlModel kModel = {
     .model_name = "simple_float_vec_mul",
 };
 
-iree_status_t create_module(iree_vm_module_t **module) {
+iree_status_t create_module(iree_vm_instance_t *instance,
+                            iree_vm_module_t **module) {
 #if !defined(BUILD_EMITC)
   const struct iree_file_toc_t *module_file_toc =
       samples_simple_vec_mul_simple_float_mul_bytecode_module_static_create();
   return iree_vm_bytecode_module_create(
+      instance,
       iree_make_const_byte_span(module_file_toc->data, module_file_toc->size),
       iree_allocator_null(), iree_allocator_system(), module);
 #else
-  return module_create(iree_allocator_system(), module);
+  return module_create(instance, iree_allocator_system(), module);
 #endif
 }
 

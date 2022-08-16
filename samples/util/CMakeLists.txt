@@ -25,7 +25,7 @@ iree_cc_library(
     iree::hal
     iree::hal::local
     iree::hal::local::loaders::static_library_loader
-    iree::hal::local::sync_driver
+    iree::hal::drivers::local_sync::sync_driver
     iree::modules::hal
     iree::vm
     iree::vm::shims_emitc

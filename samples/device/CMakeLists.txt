@@ -22,7 +22,7 @@ iree_cc_library(
   DEPS
     iree::base
     iree::hal
+    iree::hal::drivers::local_sync::sync_driver
     iree::hal::local
     iree::hal::local::loaders::static_library_loader
-    iree::hal::local::sync_driver
 )

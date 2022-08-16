@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef SAMPLES_DEVICE_H
-#define SAMPLES_DEVICE_H
+#ifndef SAMPLES_DEVICE_DEVICE_H_
+#define SAMPLES_DEVICE_DEVICE_H_
 
 #include "iree/base/api.h"
 #include "iree/hal/api.h"
@@ -26,4 +26,4 @@
 iree_status_t create_sample_device(iree_allocator_t host_allocator,
                                    iree_hal_device_t** out_device);
 
-#endif  // SAMPLES_DEVICE_H
+#endif  // SAMPLES_DEVICE_DEVICE_H_

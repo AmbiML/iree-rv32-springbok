@@ -59,7 +59,7 @@ def gen_mlmodel_input(input_name, output_file, input_shape, is_quant):
                 np.prod(input_shape))
     else:
         resized_img = Image.open(input_name).resize(
-            (input_shape[1], input_shape[2]))
+            (input_shape[2], input_shape[1]))
         input = np.array(resized_img).reshape(np.prod(input_shape))
         if not is_quant:
             low = np.min(float_input_range)

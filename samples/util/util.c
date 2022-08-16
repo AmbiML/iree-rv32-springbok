@@ -50,12 +50,12 @@ static iree_status_t prepare_input_hal_buffer_views(
       .type =
           IREE_HAL_MEMORY_TYPE_HOST_LOCAL | IREE_HAL_MEMORY_TYPE_DEVICE_VISIBLE,
       .access = IREE_HAL_MEMORY_ACCESS_READ,
-      .usage = IREE_HAL_BUFFER_USAGE_DISPATCH | IREE_HAL_BUFFER_USAGE_TRANSFER};
+      .usage = IREE_HAL_BUFFER_USAGE_DEFAULT};
   for (int i = 0; i < model->num_input; ++i) {
     if (iree_status_is_ok(result)) {
       result = iree_hal_buffer_view_allocate_buffer(
-          iree_hal_device_allocator(device), model->input_shape[i],
-          model->num_input_dim[i], model->hal_element_type,
+          iree_hal_device_allocator(device), model->num_input_dim[i],
+          model->input_shape[i], model->hal_element_type,
           IREE_HAL_ENCODING_TYPE_DENSE_ROW_MAJOR, buffer_params, *byte_span[i],
           &(arg_buffer_views[i]));
     }
@@ -67,11 +67,11 @@ static iree_status_t prepare_input_hal_buffer_views(
 }
 
 iree_status_t run(const MlModel *model) {
-  IREE_RETURN_IF_ERROR(iree_hal_module_register_types());
-
   iree_vm_instance_t *instance = NULL;
   iree_status_t result =
       iree_vm_instance_create(iree_allocator_system(), &instance);
+
+  IREE_RETURN_IF_ERROR(iree_hal_module_register_all_types(instance));
 
   iree_hal_device_t *device = NULL;
   if (iree_status_is_ok(result)) {
@@ -79,13 +79,13 @@ iree_status_t run(const MlModel *model) {
   }
   iree_vm_module_t *hal_module = NULL;
   if (iree_status_is_ok(result)) {
-    result =
-        iree_hal_module_create(device, iree_allocator_system(), &hal_module);
+    result = iree_hal_module_create(instance, device, IREE_HAL_MODULE_FLAG_NONE,
+                                    iree_allocator_system(), &hal_module);
   }
   // Load bytecode or C module.
   iree_vm_module_t *module = NULL;
   if (iree_status_is_ok(result)) {
-    result = create_module(&module);
+    result = create_module(instance, &module);
   }
 
   // Allocate a context that will hold the module state across invocations.
@@ -93,8 +93,8 @@ iree_status_t run(const MlModel *model) {
   iree_vm_module_t *modules[] = {hal_module, module};
   if (iree_status_is_ok(result)) {
     result = iree_vm_context_create_with_modules(
-        instance, IREE_VM_CONTEXT_FLAG_NONE, &modules[0],
-        IREE_ARRAYSIZE(modules), iree_allocator_system(), &context);
+        instance, IREE_VM_CONTEXT_FLAG_NONE, IREE_ARRAYSIZE(modules),
+        &modules[0], iree_allocator_system(), &context);
   }
   iree_vm_module_release(hal_module);
   iree_vm_module_release(module);
@@ -169,9 +169,11 @@ iree_status_t run(const MlModel *model) {
 
     if (iree_status_is_ok(result)) {
       if (index_output > model->num_output ||
-            mapped_memories[index_output].contents.data_length / model->output_size_bytes !=
-            model->output_length[index_output]) {
-        result = iree_make_status(IREE_STATUS_UNKNOWN, "output length mismatches");
+          mapped_memories[index_output].contents.data_length /
+                  model->output_size_bytes !=
+              model->output_length[index_output]) {
+        result =
+            iree_make_status(IREE_STATUS_UNKNOWN, "output length mismatches");
       }
     }
   }

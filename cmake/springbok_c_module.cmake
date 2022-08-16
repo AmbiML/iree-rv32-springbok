@@ -96,7 +96,7 @@ function(springbok_c_module)
   # Setup args for iree-compile.
   set(_TRANSLATE_ARGS ${_RULE_FLAGS})
   list(APPEND _TRANSLATE_ARGS "-iree-mlir-to-vm-c-module")
-  list(APPEND _TRANSLATE_ARGS "-iree-hal-target-backends=dylib-llvm-aot")
+  list(APPEND _TRANSLATE_ARGS "-iree-hal-target-backends=llvm-cpu")
   list(APPEND _TRANSLATE_ARGS "-iree-llvm-target-triple=riscv32-pc-linux-elf")
   list(APPEND _TRANSLATE_ARGS "-iree-llvm-target-cpu=generic-rv32")
   list(APPEND _TRANSLATE_ARGS "-iree-llvm-target-cpu-features=${_CPU_FEATURES}")

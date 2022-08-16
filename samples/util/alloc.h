@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef SAMPLES_UTIL_ALLOC_H
-#define SAMPLES_UTIL_ALLOC_H
+#ifndef SAMPLES_UTIL_ALLOC_H_
+#define SAMPLES_UTIL_ALLOC_H_
 
 #include "iree/base/api.h"
 #include "samples/util/model_api.h"
@@ -25,4 +25,4 @@
 iree_status_t alloc_input_buffer(const MlModel *model,
                                                void **buffer);
 
-#endif  // SAMPLES_UTIL_ALLOC_H
+#endif  // SAMPLES_UTIL_ALLOC_H_
