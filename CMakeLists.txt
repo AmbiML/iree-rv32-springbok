@@ -94,8 +94,8 @@ add_subdirectory(${IREE_SOURCE_DIR} iree)
 set(IREE_ROOT_DIR "${IREE_SOURCE_DIR}" CACHE PATH "IREE Root directory")
 include(springbok_ops)
 
-include(springbok_bytecode_module)
-include(springbok_c_module)
+include(springbok_static_module)
+include(springbok_vmvx_module)
 include(springbok_modules)
 include(iree_model_input)
 # softmax op (and mfcc) requires floorf implementation in libm. Use the nano

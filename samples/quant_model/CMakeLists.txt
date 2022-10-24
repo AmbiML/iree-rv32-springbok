@@ -28,7 +28,6 @@ springbok_modules(
     "-iree-input-type=tosa"
     "-riscv-v-vector-bits-min=512"
     "-riscv-v-fixed-length-vector-lmul-max=8"
-  PUBLIC
 )
 
 #-------------------------------------------------------------------------------
@@ -65,13 +64,13 @@ iree_cc_binary(
     "mobilenet_v1.c"
   DEPS
     ::mobilenet_quant_input_c
-    ::mobilenet_v1_bytecode_module_static
     ::mobilenet_v1_bytecode_module_static_c
+    ::mobilenet_v1_bytecode_module_static_lib
     iree::vm::bytecode_module
-    samples::util::util
+    samples::util::util_static
   LINKOPTS
     "LINKER:--defsym=__itcm_length__=1M"
-    "LINKER:--defsym=__stack_size__=150k"
+    "LINKER:--defsym=__stack_size__=300k"
 )
 
 iree_cc_binary(
@@ -81,12 +80,12 @@ iree_cc_binary(
     "mobilenet_v1.c"
   DEPS
     ::mobilenet_quant_input_c
-    ::mobilenet_v1_c_module_static_c
     ::mobilenet_v1_c_module_static_emitc
-    samples::util::util
+    ::mobilenet_v1_c_module_static_lib
+    samples::util::util_static
   LINKOPTS
     "LINKER:--defsym=__itcm_length__=1M"
-    "LINKER:--defsym=__stack_size__=150k"
+    "LINKER:--defsym=__stack_size__=300k"
   COPTS
     "-DBUILD_EMITC"
 )

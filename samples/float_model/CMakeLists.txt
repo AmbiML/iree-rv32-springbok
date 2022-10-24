@@ -25,7 +25,6 @@ springbok_modules(
     "samples_float_model_mobilenet_v1"
   FLAGS
     "-iree-input-type=tosa"
-  PUBLIC
 )
 
 springbok_modules(
@@ -37,7 +36,6 @@ springbok_modules(
     "samples_float_model_mnist"
   FLAGS
     "-iree-input-type=mhlo"
-  PUBLIC
 )
 
 #-------------------------------------------------------------------------------
@@ -84,11 +82,11 @@ iree_cc_binary(
   SRCS
     "mobilenet_v1.c"
   DEPS
-    ::mobilenet_v1_bytecode_module_static
     ::mobilenet_v1_bytecode_module_static_c
+    ::mobilenet_v1_bytecode_module_static_lib
     ::mobilenet_input_c
     iree::vm::bytecode_module
-    samples::util::util
+    samples::util::util_static
   LINKOPTS
     "LINKER:--defsym=__itcm_length__=1M"
     "LINKER:--defsym=__stack_size__=200k"
@@ -100,10 +98,10 @@ iree_cc_binary(
   SRCS
     "mobilenet_v1.c"
   DEPS
-    ::mobilenet_v1_c_module_static_c
     ::mobilenet_v1_c_module_static_emitc
+    ::mobilenet_v1_c_module_static_lib
     ::mobilenet_input_c
-    samples::util::util
+    samples::util::util_static
     "m"
   LINKOPTS
     "LINKER:--defsym=__itcm_length__=1M"
@@ -118,11 +116,11 @@ iree_cc_binary(
   SRCS
     "mnist.c"
   DEPS
-    ::mnist_bytecode_module_static
     ::mnist_bytecode_module_static_c
+    ::mnist_bytecode_module_static_lib
     ::mnist_input_c
     iree::vm::bytecode_module
-    samples::util::util
+    samples::util::util_static
   LINKOPTS
     "LINKER:--defsym=__stack_size__=100k"
 )
@@ -133,10 +131,10 @@ iree_cc_binary(
   SRCS
     "mnist.c"
   DEPS
-    ::mnist_c_module_static_c
     ::mnist_c_module_static_emitc
+    ::mnist_c_module_static_lib
     ::mnist_input_c
-    samples::util::util
+    samples::util::util_static
     "m"
   LINKOPTS
     "LINKER:--defsym=__stack_size__=100k"

@@ -14,7 +14,7 @@
 
 iree_cc_library(
   NAME
-    util
+    util_base
   HDRS
     "util.h"
   SRCS
@@ -24,12 +24,26 @@ iree_cc_library(
     iree::base
     iree::hal
     iree::hal::local
-    iree::hal::local::loaders::static_library_loader
     iree::hal::drivers::local_sync::sync_driver
     iree::modules::hal
     iree::vm
     iree::vm::shims_emitc
+)
+
+iree_cc_library(
+  NAME
+    util_static
+  DEPS
+    ::util_base
     samples::device::device_static_loader
+)
+
+iree_cc_library(
+  NAME
+    util_vmvx
+  DEPS
+    ::util_base
+    samples::device::device_vmvx_loader
 )
 
 iree_cc_library(
