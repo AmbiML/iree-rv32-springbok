@@ -23,10 +23,11 @@
 #include "samples/util/model_api.h"
 
 // A function to create the HAL device from the different backend targets.
-// The HAL device is returned based on the implementation, and it must be
-// released by the caller.
+// The HAL device and loader are returned based on the implementation, and they
+// must be released by the caller.
 iree_status_t create_sample_device(iree_allocator_t host_allocator,
-                                               iree_hal_device_t** out_device) {
+                                   iree_hal_device_t** out_device,
+                                   iree_hal_executable_loader_t** loader) {
   iree_status_t status = iree_ok_status();
 
   // Set paramters for the device created in the next step.
@@ -36,12 +37,10 @@ iree_status_t create_sample_device(iree_allocator_t host_allocator,
   // Load the statically embedded library
   const iree_hal_executable_library_query_fn_t libraries[] = {library_query()};
 
-  iree_hal_executable_loader_t* library_loader = NULL;
   if (iree_status_is_ok(status)) {
     status = iree_hal_static_library_loader_create(
         IREE_ARRAYSIZE(libraries), libraries,
-        iree_hal_executable_import_provider_null(), host_allocator,
-        &library_loader);
+        iree_hal_executable_import_provider_null(), host_allocator, loader);
   }
 
   // Use the default host allocator for buffer allocations.
@@ -55,11 +54,10 @@ iree_status_t create_sample_device(iree_allocator_t host_allocator,
   // Create the device and release the executor and loader afterwards.
   if (iree_status_is_ok(status)) {
     status = iree_hal_sync_device_create(
-        identifier, &params, /*loader_count=*/1, &library_loader,
-        device_allocator, host_allocator, out_device);
+        identifier, &params, /*loader_count=*/1, loader, device_allocator,
+        host_allocator, out_device);
   }
 
   iree_hal_allocator_release(device_allocator);
-  iree_hal_executable_loader_release(library_loader);
   return status;
 }

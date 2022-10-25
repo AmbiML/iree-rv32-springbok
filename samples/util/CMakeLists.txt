@@ -30,6 +30,7 @@ iree_cc_library(
     iree::vm::shims_emitc
 )
 
+# static library using regular HAL
 iree_cc_library(
   NAME
     util_static
@@ -38,12 +39,60 @@ iree_cc_library(
     samples::device::device_static_loader
 )
 
+# vmvx using regular HAL
 iree_cc_library(
   NAME
     util_vmvx
   DEPS
     ::util_base
     samples::device::device_vmvx_loader
+)
+
+# static library using inline HAL
+iree_cc_library(
+  NAME
+    util_static_inline
+  HDRS
+    "util.h"
+  SRCS
+    "util.c"
+  DEPS
+    ::alloc
+    iree::base
+    iree::hal
+    iree::hal::local
+    iree::hal::drivers::local_sync::sync_driver
+    iree::modules::hal
+    iree::modules::hal::inline
+    iree::modules::hal::loader
+    iree::vm
+    iree::vm::shims_emitc
+    samples::device::device_static_loader
+  COPTS
+    "-DBUILD_LOADER_HAL"
+)
+
+# vmvx using inline HAL
+iree_cc_library(
+  NAME
+    util_vmvx_inline
+  HDRS
+    "util.h"
+  SRCS
+    "util.c"
+  DEPS
+    ::alloc
+    iree::base
+    iree::hal
+    iree::hal::local
+    iree::hal::drivers::local_sync::sync_driver
+    iree::modules::hal
+    iree::modules::hal::inline
+    iree::vm
+    iree::vm::shims_emitc
+    samples::device::device_vmvx_loader
+  COPTS
+    "-DBUILD_INLINE_HAL"
 )
 
 iree_cc_library(

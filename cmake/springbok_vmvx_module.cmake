@@ -20,6 +20,7 @@
 # FLAGS: Flags to pass to the translation tool (list of strings).
 # DEPENDS: List of other targets and files required for this binary.
 # EMITC: Uses EmitC to output C code instead of VM bytecode.
+# INLINE_HAL: Use inline HAL.
 #
 # Examples:
 # springbok_vmvx_module(
@@ -37,7 +38,7 @@
 function(springbok_vmvx_module)
   cmake_parse_arguments(
     _RULE
-    "EMITC"
+    "EMITC;INLINE_HAL"
     "NAME;SRC;C_IDENTIFIER"
     "FLAGS;DEPENDS"
     ${ARGN}
@@ -74,7 +75,12 @@ function(springbok_vmvx_module)
 
   # Set common iree-compile flags
   set(_COMPILER_ARGS ${_RULE_FLAGS})
-  list(APPEND _COMPILER_ARGS "--iree-hal-target-backends=vmvx")
+  if (${_RULE_INLINE_HAL})
+    list(APPEND _COMPILER_ARGS "--iree-execution-model=inline-static")
+    list(APPEND _COMPILER_ARGS "--iree-hal-target-backends=vmvx-inline")
+  else()
+    list(APPEND _COMPILER_ARGS "--iree-hal-target-backends=vmvx")
+  endif()
 
   if(_RULE_EMITC)
     list(APPEND _COMPILER_ARGS "--iree-vm-target-index-bits=32")

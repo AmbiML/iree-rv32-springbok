@@ -22,6 +22,7 @@
 # DEPENDS: List of other targets and files required for this binary.
 # RVV_OFF: Indicate RVV is OFF (default: ON)
 # EMITC: Uses EmitC to output C code instead of VM bytecode.
+# INLINE_HAL: Use inline HAL.
 #
 # Examples:
 # springbok_static_module(
@@ -40,7 +41,7 @@
 function(springbok_static_module)
   cmake_parse_arguments(
     _RULE
-    "RVV_OFF;EMITC"
+    "RVV_OFF;EMITC;INLINE_HAL"
     "NAME;SRC;C_IDENTIFIER"
     "FLAGS;DEPENDS"
     ${ARGN}
@@ -91,6 +92,9 @@ function(springbok_static_module)
   list(APPEND _COMPILER_ARGS "--iree-llvm-target-cpu-features=${_CPU_FEATURES}")
   list(APPEND _COMPILER_ARGS "--iree-llvm-target-abi=ilp32")
   list(APPEND _COMPILER_ARGS "--iree-llvm-link-embedded=false")
+  if (${_RULE_INLINE_HAL})
+    list(APPEND _COMPILER_ARGS "--iree-execution-model=inline-dynamic")
+  endif()
 
   if(_RULE_EMITC)
     set(_O_FILE_NAME "${_RULE_NAME}_c.o")

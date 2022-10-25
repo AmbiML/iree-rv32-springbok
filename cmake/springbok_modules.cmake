@@ -26,6 +26,7 @@ include(CMakeParseArguments)
 #     If omitted then no C embed code will be generated.
 # RVV_OFF: Indicate RVV is OFF (default: ON)
 # VMVX: Compile VMVX backend
+# INLINE_HAL: Use inline HAL.
 #
 # Examples:
 # springbok_modules(
@@ -56,7 +57,7 @@ include(CMakeParseArguments)
 function(springbok_modules)
   cmake_parse_arguments(
     _RULE
-    "RVV_OFF;VMVX"
+    "RVV_OFF;VMVX;INLINE_HAL"
     "NAME;SRC;C_IDENTIFIER"
     "FLAGS"
     ${ARGN}
@@ -86,6 +87,10 @@ function(springbok_modules)
     set(_INPUT_FILENAME ${_RULE_SRC_TRIM})
   endif()
 
+  if (${_RULE_INLINE_HAL})
+    set(_INLINE_HAL_ARG "INLINE_HAL")
+  endif()
+
   springbok_static_module(
     NAME
       "${_RULE_NAME}_bytecode_module_static"
@@ -96,6 +101,7 @@ function(springbok_modules)
     FLAGS
       ${_RULE_FLAGS}
     "${_RVV_OFF_ARG}"
+    "${_INLINE_HAL_ARG}"
     DEPENDS
       "${_INPUT_FILENAME}"
   )
@@ -108,11 +114,13 @@ function(springbok_modules)
     FLAGS
       ${_RULE_FLAGS}
     "${_RVV_OFF_ARG}"
+    "${_INLINE_HAL_ARG}"
     EMITC
     DEPENDS
       "${_INPUT_FILENAME}"
   )
 
+  # TODO(#10810): Only add `INLINE_HAL` option to non-emitc target for now.
   if (${_RULE_VMVX})
     springbok_vmvx_module(
       NAME
@@ -125,6 +133,7 @@ function(springbok_modules)
         ${_RULE_FLAGS}
       DEPENDS
         "${_INPUT_FILENAME}"
+      "${_INLINE_HAL_ARG}"
     )
 
     springbok_vmvx_module(
