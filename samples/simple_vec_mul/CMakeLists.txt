@@ -27,6 +27,8 @@ springbok_modules(
     "samples_simple_vec_mul_simple_float_mul"
   FLAGS
     "-iree-input-type=mhlo"
+  VMVX
+  INLINE_HAL
   PUBLIC
 )
 
@@ -41,6 +43,8 @@ springbok_modules(
     "-iree-input-type=mhlo"
     "-riscv-v-vector-bits-min=512"
     "-riscv-v-fixed-length-vector-lmul-max=8"
+  VMVX
+  INLINE_HAL
   PUBLIC
 )
 
@@ -48,6 +52,11 @@ springbok_modules(
 # Binaries to execute the MLIR bytecode modules
 #-------------------------------------------------------------------------------
 
+# Different util libraries available:
+#   util_static: static library using regular HAL
+#   util_vmvx: vmvx using regular HAL
+#   util_static_inline: static library using inline HAL
+#   util_vmvx_inline: vmvx using inline HAL
 
 # If the program requires a larger stack size, add
 #
@@ -56,16 +65,47 @@ springbok_modules(
 #
 # to increase it.
 
+# TODO(#10810): Only use inline HAL with non-emitc target for now.
+iree_cc_binary(
+  NAME
+    simple_float_vec_mul_bytecode_vmvx
+  SRCS
+    "float_vec.c"
+  DEPS
+    ::simple_float_mul_bytecode_module_vmvx_c
+    iree::vm::bytecode_module
+    samples::util::util_vmvx_inline
+  LINKOPTS
+    "LINKER:--defsym=__stack_size__=20k"
+  COPTS
+    "-DBUILD_VMVX"
+)
+
+iree_cc_binary(
+  NAME
+    simple_float_vec_mul_emitc_vmvx
+  SRCS
+    "float_vec.c"
+  DEPS
+    ::simple_float_mul_c_module_vmvx_emitc
+    samples::util::util_vmvx
+  LINKOPTS
+    "LINKER:--defsym=__stack_size__=20k"
+  COPTS
+    "-DBUILD_EMITC"
+    "-DBUILD_VMVX"
+)
+
 iree_cc_binary(
   NAME
     simple_float_vec_mul_bytecode_static
   SRCS
     "float_vec.c"
   DEPS
-    ::simple_float_mul_bytecode_module_static
     ::simple_float_mul_bytecode_module_static_c
+    ::simple_float_mul_bytecode_module_static_lib
     iree::vm::bytecode_module
-    samples::util::util
+    samples::util::util_static_inline
   LINKOPTS
     "LINKER:--defsym=__stack_size__=20k"
 )
@@ -76,13 +116,44 @@ iree_cc_binary(
   SRCS
     "float_vec.c"
   DEPS
-    ::simple_float_mul_c_module_static_c
     ::simple_float_mul_c_module_static_emitc
-    samples::util::util
+    ::simple_float_mul_c_module_static_lib
+    samples::util::util_static_inline
   LINKOPTS
     "LINKER:--defsym=__stack_size__=20k"
   COPTS
     "-DBUILD_EMITC"
+)
+
+# TODO(#10810): Only use inline HAL with non-emitc target for now.
+iree_cc_binary(
+  NAME
+    simple_int_vec_mul_bytecode_vmvx
+  SRCS
+    "int_vec.c"
+  DEPS
+    ::simple_int_mul_bytecode_module_vmvx_c
+    iree::vm::bytecode_module
+    samples::util::util_vmvx_inline
+  LINKOPTS
+    "LINKER:--defsym=__stack_size__=20k"
+  COPTS
+    "-DBUILD_VMVX"
+)
+
+iree_cc_binary(
+  NAME
+    simple_int_vec_mul_emitc_vmvx
+  SRCS
+    "int_vec.c"
+  DEPS
+    ::simple_int_mul_c_module_vmvx_emitc
+    samples::util::util_vmvx
+  LINKOPTS
+    "LINKER:--defsym=__stack_size__=20k"
+  COPTS
+    "-DBUILD_EMITC"
+    "-DBUILD_VMVX"
 )
 
 iree_cc_binary(
@@ -91,10 +162,10 @@ iree_cc_binary(
   SRCS
     "int_vec.c"
   DEPS
-    ::simple_int_mul_bytecode_module_static
     ::simple_int_mul_bytecode_module_static_c
+    ::simple_int_mul_bytecode_module_static_lib
     iree::vm::bytecode_module
-    samples::util::util
+    samples::util::util_static_inline
   LINKOPTS
     "LINKER:--defsym=__stack_size__=20k"
 )
@@ -105,9 +176,9 @@ iree_cc_binary(
   SRCS
     "int_vec.c"
   DEPS
-    ::simple_int_mul_c_module_static_c
     ::simple_int_mul_c_module_static_emitc
-    samples::util::util
+    ::simple_int_mul_c_module_static_lib
+    samples::util::util_static_inline
   LINKOPTS
     "LINKER:--defsym=__stack_size__=20k"
   COPTS

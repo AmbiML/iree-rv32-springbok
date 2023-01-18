@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-// Static library loading in IREE.
+// VMVX module loading in IREE.
 
 #include "iree/hal/drivers/local_sync/sync_device.h"
-#include "iree/hal/local/loaders/static_library_loader.h"
+#include "iree/hal/local/loaders/vmvx_module_loader.h"
 #include "iree/modules/hal/module.h"
 #include "samples/device/device.h"
 #include "samples/util/model_api.h"
@@ -28,31 +28,30 @@
 iree_status_t create_sample_device(iree_allocator_t host_allocator,
                                    iree_hal_device_t** out_device,
                                    iree_hal_executable_loader_t** loader) {
-  iree_status_t status = iree_ok_status();
-
-  // Set paramters for the device created in the next step.
+  // Set parameters for the device created in the next step.
   iree_hal_sync_device_params_t params;
   iree_hal_sync_device_params_initialize(&params);
 
-  // Load the statically embedded library
-  const iree_hal_executable_library_query_fn_t libraries[] = {library_query()};
+  iree_vm_instance_t* instance = NULL;
+  iree_status_t status = iree_vm_instance_create(host_allocator, &instance);
 
   if (iree_status_is_ok(status)) {
-    status = iree_hal_static_library_loader_create(
-        IREE_ARRAYSIZE(libraries), libraries,
-        iree_hal_executable_import_provider_null(), host_allocator, loader);
+    status = iree_hal_vmvx_module_loader_create(
+        instance, /*user_module_count=*/0, /*user_modules=*/NULL,
+        host_allocator, loader);
   }
+  iree_vm_instance_release(instance);
 
   // Use the default host allocator for buffer allocations.
-  iree_string_view_t identifier = iree_make_cstring_view("sync");
+  iree_string_view_t identifier = iree_make_cstring_view("vmvx");
   iree_hal_allocator_t* device_allocator = NULL;
   if (iree_status_is_ok(status)) {
     status = iree_hal_allocator_create_heap(identifier, host_allocator,
                                             host_allocator, &device_allocator);
   }
 
-  // Create the device and release the executor and loader afterwards.
   if (iree_status_is_ok(status)) {
+    // Create the synchronous device.
     status = iree_hal_sync_device_create(
         identifier, &params, /*loader_count=*/1, loader, device_allocator,
         host_allocator, out_device);

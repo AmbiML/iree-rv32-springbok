@@ -19,11 +19,13 @@
 
 #include "iree/base/api.h"
 #include "iree/hal/api.h"
+#include "iree/hal/local/executable_loader.h"
 
 // Create the HAL device from the different backend targets.
-// The HAL device is returned based on the implementation, and it must be
-// released by the caller.
+// The HAL device and loader are returned based on the implementation, and they
+// must be released by the caller.
 iree_status_t create_sample_device(iree_allocator_t host_allocator,
-                                   iree_hal_device_t** out_device);
+                                   iree_hal_device_t** out_device,
+                                   iree_hal_executable_loader_t** loader);
 
 #endif  // SAMPLES_DEVICE_DEVICE_H_

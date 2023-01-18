@@ -25,6 +25,8 @@ include(CMakeParseArguments)
 # C_IDENTIFIER: Identifier to use for generate c embed code.
 #     If omitted then no C embed code will be generated.
 # RVV_OFF: Indicate RVV is OFF (default: ON)
+# VMVX: Compile VMVX backend
+# INLINE_HAL: Use inline HAL.
 #
 # Examples:
 # springbok_modules(
@@ -38,7 +40,6 @@ include(CMakeParseArguments)
 #     "-iree-input-type=tosa"
 #     "-riscv-v-vector-bits-min=512"
 #     "-riscv-v-fixed-length-vector-lmul-max=8"
-#   PUBLIC
 # )
 #
 # springbok_modules(
@@ -50,14 +51,13 @@ include(CMakeParseArguments)
 #     "samples_simple_vec_mul_simple_float_mul"
 #   FLAGS
 #     "-iree-input-type=mhlo"
-#   PUBLIC
 # )
 #
 
 function(springbok_modules)
   cmake_parse_arguments(
     _RULE
-    "PUBLIC;RVV_OFF"
+    "RVV_OFF;VMVX;INLINE_HAL"
     "NAME;SRC;C_IDENTIFIER"
     "FLAGS"
     ${ARGN}
@@ -87,7 +87,11 @@ function(springbok_modules)
     set(_INPUT_FILENAME ${_RULE_SRC_TRIM})
   endif()
 
-  springbok_bytecode_module(
+  if (${_RULE_INLINE_HAL})
+    set(_INLINE_HAL_ARG "INLINE_HAL")
+  endif()
+
+  springbok_static_module(
     NAME
       "${_RULE_NAME}_bytecode_module_static"
     SRC
@@ -95,24 +99,53 @@ function(springbok_modules)
     C_IDENTIFIER
       "${_RULE_C_IDENTIFIER}_bytecode_module_static"
     FLAGS
-      "${_RULE_FLAGS}"
+      ${_RULE_FLAGS}
     "${_RVV_OFF_ARG}"
+    "${_INLINE_HAL_ARG}"
     DEPENDS
       "${_INPUT_FILENAME}"
-    PUBLIC
   )
 
-  springbok_c_module(
+  springbok_static_module(
     NAME
       "${_RULE_NAME}_c_module_static"
     SRC
       "${_INPUT_FILENAME}"
     FLAGS
-      "${_RULE_FLAGS}"
+      ${_RULE_FLAGS}
     "${_RVV_OFF_ARG}"
+    "${_INLINE_HAL_ARG}"
+    EMITC
     DEPENDS
       "${_INPUT_FILENAME}"
-    PUBLIC
   )
 
+  # TODO(#10810): Only add `INLINE_HAL` option to non-emitc target for now.
+  if (${_RULE_VMVX})
+    springbok_vmvx_module(
+      NAME
+        "${_RULE_NAME}_bytecode_module_vmvx"
+      SRC
+        "${_INPUT_FILENAME}"
+      C_IDENTIFIER
+        "${_RULE_C_IDENTIFIER}_bytecode_module_vmvx"
+      FLAGS
+        ${_RULE_FLAGS}
+      DEPENDS
+        "${_INPUT_FILENAME}"
+      "${_INLINE_HAL_ARG}"
+    )
+
+    springbok_vmvx_module(
+      NAME
+        "${_RULE_NAME}_c_module_vmvx"
+      SRC
+        "${_INPUT_FILENAME}"
+      FLAGS
+        ${_RULE_FLAGS}
+      EMITC
+      DEPENDS
+        "${_INPUT_FILENAME}"
+    )
+  endif()
 endfunction()

@@ -23,12 +23,89 @@
 
 #include "iree/base/api.h"
 #include "iree/hal/api.h"
+#include "iree/modules/hal/inline/module.h"
+#include "iree/modules/hal/loader/module.h"
 #include "iree/modules/hal/module.h"
 #include "iree/vm/api.h"
 #include "iree/vm/bytecode_module.h"
 #include "samples/device/device.h"
 
 extern const MlModel kModel;
+// Create context that will hold the module state across invocations.
+static iree_status_t create_context(iree_vm_instance_t *instance,
+                                    iree_hal_device_t **device,
+                                    iree_vm_context_t **context) {
+  iree_allocator_t host_allocator = iree_allocator_system();
+  iree_status_t result = iree_vm_instance_create(host_allocator, &instance);
+
+#if defined(BUILD_INLINE_HAL)
+  IREE_RETURN_IF_ERROR(iree_hal_module_register_inline_types(instance));
+#elif defined(BUILD_LOADER_HAL)
+  IREE_RETURN_IF_ERROR(iree_hal_module_register_loader_types(instance));
+#else
+  IREE_RETURN_IF_ERROR(iree_hal_module_register_all_types(instance));
+#endif
+
+  iree_hal_executable_loader_t *loader = NULL;
+  if (iree_status_is_ok(result)) {
+    result = create_sample_device(host_allocator, device, &loader);
+  }
+
+  // Load bytecode or C module.
+  iree_vm_module_t *module = NULL;
+  if (iree_status_is_ok(result)) {
+    result = create_module(instance, &module);
+  }
+
+#if defined(BUILD_INLINE_HAL) || defined(BUILD_LOADER_HAL)
+  // Create hal_inline_module
+  iree_vm_module_t *hal_inline_module = NULL;
+  if (iree_status_is_ok(result)) {
+    result = iree_hal_inline_module_create(
+        instance, IREE_HAL_INLINE_MODULE_FLAG_NONE,
+        iree_hal_device_allocator(*device), host_allocator, &hal_inline_module);
+  }
+#endif
+#if defined(BUILD_INLINE_HAL)
+  iree_vm_module_t *modules[] = {hal_inline_module, module};
+#elif defined(BUILD_LOADER_HAL)
+  // Create hal_loader_module
+  iree_vm_module_t *hal_loader_module = NULL;
+  if (iree_status_is_ok(result)) {
+    result = iree_hal_loader_module_create(instance, IREE_HAL_MODULE_FLAG_NONE,
+                                           /*loader_count=*/1, &loader,
+                                           host_allocator, &hal_loader_module);
+  }
+  iree_hal_executable_loader_release(loader);
+  iree_vm_module_t *modules[] = {hal_inline_module, hal_loader_module, module};
+#else
+  // Create hal_module
+  iree_vm_module_t *hal_module = NULL;
+  if (iree_status_is_ok(result)) {
+    result =
+        iree_hal_module_create(instance, *device, IREE_HAL_MODULE_FLAG_NONE,
+                               host_allocator, &hal_module);
+  }
+  iree_vm_module_t *modules[] = {hal_module, module};
+#endif
+
+  // Allocate a context that will hold the module state across invocations.
+  if (iree_status_is_ok(result)) {
+    result = iree_vm_context_create_with_modules(
+        instance, IREE_VM_CONTEXT_FLAG_NONE, IREE_ARRAYSIZE(modules),
+        &modules[0], host_allocator, context);
+  }
+#if defined(BUILD_INLINE_HAL) || defined(BUILD_LOADER_HAL)
+  iree_vm_module_release(hal_inline_module);
+#else
+  iree_vm_module_release(hal_module);
+#endif
+#if defined(BUILD_LOADER_HAL)
+  iree_vm_module_release(hal_loader_module);
+#endif
+  iree_vm_module_release(module);
+  return result;
+}
 
 // Prepare the input buffers and buffer_views based on the data type. They must
 // be released by the caller.
@@ -68,36 +145,10 @@ static iree_status_t prepare_input_hal_buffer_views(
 
 iree_status_t run(const MlModel *model) {
   iree_vm_instance_t *instance = NULL;
-  iree_status_t result =
-      iree_vm_instance_create(iree_allocator_system(), &instance);
-
-  IREE_RETURN_IF_ERROR(iree_hal_module_register_all_types(instance));
-
   iree_hal_device_t *device = NULL;
-  if (iree_status_is_ok(result)) {
-    result = create_sample_device(iree_allocator_system(), &device);
-  }
-  iree_vm_module_t *hal_module = NULL;
-  if (iree_status_is_ok(result)) {
-    result = iree_hal_module_create(instance, device, IREE_HAL_MODULE_FLAG_NONE,
-                                    iree_allocator_system(), &hal_module);
-  }
-  // Load bytecode or C module.
-  iree_vm_module_t *module = NULL;
-  if (iree_status_is_ok(result)) {
-    result = create_module(instance, &module);
-  }
-
-  // Allocate a context that will hold the module state across invocations.
   iree_vm_context_t *context = NULL;
-  iree_vm_module_t *modules[] = {hal_module, module};
-  if (iree_status_is_ok(result)) {
-    result = iree_vm_context_create_with_modules(
-        instance, IREE_VM_CONTEXT_FLAG_NONE, IREE_ARRAYSIZE(modules),
-        &modules[0], iree_allocator_system(), &context);
-  }
-  iree_vm_module_release(hal_module);
-  iree_vm_module_release(module);
+  // create context
+  iree_status_t result = create_context(instance, &device, &context);
 
   // Lookup the entry point function.
   // Note that we use the synchronous variant which operates on pure type/shape
