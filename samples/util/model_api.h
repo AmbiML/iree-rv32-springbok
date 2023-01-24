@@ -19,11 +19,8 @@
 
 // Define ML model configuration and model-specific utility APIs.
 
-#include "iree/base/api.h"
-#include "iree/hal/api.h"
 #include "iree/hal/local/executable_library.h"
 #include "iree/modules/hal/module.h"
-#include "iree/vm/api.h"
 #include "iree/vm/bytecode_module.h"
 
 #define MAX_MODEL_INPUT_NUM 2
@@ -45,11 +42,6 @@ typedef struct {
   char model_name[];
 } MlModel;
 
-typedef struct {
-  void *result;
-  uint32_t len;
-} MlOutput;
-
 // Load the statically embedded library
 iree_hal_executable_library_query_fn_t library_query(void);
 
@@ -64,10 +56,9 @@ iree_status_t load_input_data(const MlModel *model, void **buffer,
                               iree_const_byte_span_t **byte_span);
 
 // Process the ML execution output into the final data to be sent to the
-// host. The final format is model dependent, so the address and size
-// are returned via `output.`
+// host. `output_length` is set to the total byte size of the model's output.
 iree_status_t process_output(const MlModel *model,
                              iree_hal_buffer_mapping_t *buffers,
-                             MlOutput *output);
+                             uint32_t *output_length);
 
 #endif  // SAMPLES_UTIL_MODEL_API_H_

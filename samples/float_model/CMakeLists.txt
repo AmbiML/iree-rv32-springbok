@@ -82,9 +82,9 @@ iree_cc_binary(
   SRCS
     "mobilenet_v1.c"
   DEPS
+    ::mobilenet_input_c
     ::mobilenet_v1_bytecode_module_static_c
     ::mobilenet_v1_bytecode_module_static_lib
-    ::mobilenet_input_c
     iree::vm::bytecode_module
     samples::util::util_static
   LINKOPTS
@@ -98,11 +98,10 @@ iree_cc_binary(
   SRCS
     "mobilenet_v1.c"
   DEPS
+    ::mobilenet_input_c
     ::mobilenet_v1_c_module_static_emitc
     ::mobilenet_v1_c_module_static_lib
-    ::mobilenet_input_c
     samples::util::util_static
-    "m"
   LINKOPTS
     "LINKER:--defsym=__itcm_length__=1M"
     "LINKER:--defsym=__stack_size__=200k"

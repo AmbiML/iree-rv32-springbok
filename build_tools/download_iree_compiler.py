@@ -65,7 +65,7 @@ def main():
     parser = argparse.ArgumentParser(
         description="Download IREE host compiler from snapshot releases")
     parser.add_argument(
-        "--tag_name", action="store", default="candidate-20221112.325",
+        "--tag_name", action="store", default="candidate-20230124.407",
         help="snapshot tag to download. If not set, default to the one synced to third_party/iree commit.")
     parser.add_argument(
         "--release_url", action="store",

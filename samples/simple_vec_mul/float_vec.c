@@ -16,8 +16,6 @@
 
 // Float simple_mul bytecode loading and input/output processes
 
-#include "iree/base/api.h"
-#include "iree/hal/api.h"
 #include "samples/util/util.h"
 
 // Compiled module embedded here to avoid file IO:
@@ -98,7 +96,7 @@ iree_status_t load_input_data(const MlModel *model, void **buffer,
 
 iree_status_t process_output(const MlModel *model,
                              iree_hal_buffer_mapping_t *buffers,
-                             MlOutput *output) {
+                             uint32_t *output_length) {
   iree_status_t result = iree_ok_status();
   for (int i = 0; i < buffers[0].contents.data_length / sizeof(float); ++i) {
     if (((const float *)buffers[0].contents.data)[i] != i * i / 8.0f) {

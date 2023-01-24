@@ -29,7 +29,6 @@ springbok_modules(
     "-iree-input-type=mhlo"
   VMVX
   INLINE_HAL
-  PUBLIC
 )
 
 springbok_modules(
@@ -45,7 +44,6 @@ springbok_modules(
     "-riscv-v-fixed-length-vector-lmul-max=8"
   VMVX
   INLINE_HAL
-  PUBLIC
 )
 
 #-------------------------------------------------------------------------------
@@ -73,7 +71,6 @@ iree_cc_binary(
     "float_vec.c"
   DEPS
     ::simple_float_mul_bytecode_module_vmvx_c
-    iree::vm::bytecode_module
     samples::util::util_vmvx_inline
   LINKOPTS
     "LINKER:--defsym=__stack_size__=20k"
@@ -133,7 +130,6 @@ iree_cc_binary(
     "int_vec.c"
   DEPS
     ::simple_int_mul_bytecode_module_vmvx_c
-    iree::vm::bytecode_module
     samples::util::util_vmvx_inline
   LINKOPTS
     "LINKER:--defsym=__stack_size__=20k"

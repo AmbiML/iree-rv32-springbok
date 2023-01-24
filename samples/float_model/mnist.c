@@ -22,10 +22,6 @@
 
 #include <springbok.h>
 
-#include "iree/base/api.h"
-#include "iree/hal/api.h"
-#include "samples/util/util.h"
-
 // Compiled module embedded here to avoid file IO:
 #if !defined(BUILD_EMITC)
 #include "samples/float_model/mnist_bytecode_module_static.h"
@@ -35,20 +31,6 @@
 #include "samples/float_model/mnist_c_module_static_emitc.h"
 #endif
 #include "samples/float_model/mnist_input_c.h"
-
-const MlModel kModel = {
-    .num_input = 1,
-    .num_input_dim = {4},
-    .input_shape = {{1, 28, 28, 1}},
-    .input_length = {28 * 28 * 1},
-    .input_size_bytes = {sizeof(float)},
-    .num_output = 1,
-    .output_length = {10},
-    .output_size_bytes = sizeof(float),
-    .hal_element_type = IREE_HAL_ELEMENT_TYPE_FLOAT_32,
-    .entry_func = "module.predict",
-    .model_name = "mnist",
-};
 
 MnistOutput score;
 
@@ -80,7 +62,7 @@ iree_status_t load_input_data(const MlModel *model, void **buffer,
 
 iree_status_t process_output(const MlModel *model,
                              iree_hal_buffer_mapping_t *buffers,
-                             MlOutput *output) {
+                             uint32_t *output_length) {
   iree_status_t result = iree_ok_status();
   // find the label index with best prediction
   float best_out = 0.0;
@@ -98,7 +80,6 @@ iree_status_t process_output(const MlModel *model,
 
   LOG_INFO("Digit recognition result is: digit: %d", best_idx);
 
-  output->result = &score;
-  output->len = sizeof(score);
+  *output_length = sizeof(score);
   return result;
 }

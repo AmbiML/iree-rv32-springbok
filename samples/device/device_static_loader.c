@@ -18,8 +18,6 @@
 
 #include "iree/hal/drivers/local_sync/sync_device.h"
 #include "iree/hal/local/loaders/static_library_loader.h"
-#include "iree/modules/hal/module.h"
-#include "samples/device/device.h"
 #include "samples/util/model_api.h"
 
 // A function to create the HAL device from the different backend targets.

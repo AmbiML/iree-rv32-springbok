@@ -19,18 +19,21 @@
 #include "samples/util/util.h"
 
 #include <springbok.h>
-#include <stdio.h>
 
-#include "iree/base/api.h"
-#include "iree/hal/api.h"
 #include "iree/modules/hal/inline/module.h"
 #include "iree/modules/hal/loader/module.h"
-#include "iree/modules/hal/module.h"
-#include "iree/vm/api.h"
-#include "iree/vm/bytecode_module.h"
 #include "samples/device/device.h"
 
+typedef struct {
+  uint32_t return_code;  // Populated in crt0.S
+  uint32_t epc;          // Populated in crt0.S
+  uint32_t length;
+} OutputHeader;
+
+OutputHeader output_header;
+
 extern const MlModel kModel;
+
 // Create context that will hold the module state across invocations.
 static iree_status_t create_context(iree_vm_instance_t *instance,
                                     iree_hal_device_t **device,
@@ -76,7 +79,6 @@ static iree_status_t create_context(iree_vm_instance_t *instance,
                                            /*loader_count=*/1, &loader,
                                            host_allocator, &hal_loader_module);
   }
-  iree_hal_executable_loader_release(loader);
   iree_vm_module_t *modules[] = {hal_inline_module, hal_loader_module, module};
 #else
   // Create hal_module
@@ -88,6 +90,7 @@ static iree_status_t create_context(iree_vm_instance_t *instance,
   }
   iree_vm_module_t *modules[] = {hal_module, module};
 #endif
+  iree_hal_executable_loader_release(loader);
 
   // Allocate a context that will hold the module state across invocations.
   if (iree_status_is_ok(result)) {
@@ -231,9 +234,9 @@ iree_status_t run(const MlModel *model) {
 
   // Post-process memory into model output.
   if (iree_status_is_ok(result)) {
-    MlOutput output = {.result = NULL, .len = 0};
-    result = process_output(model, mapped_memories, &output);
-    // TODO: Utilize the output in the larger system.
+    uint32_t length = 0;
+    result = process_output(model, mapped_memories, &length);
+    output_header.length = length;
   }
 
   for (int index_output = 0; index_output < model->num_output; index_output++) {

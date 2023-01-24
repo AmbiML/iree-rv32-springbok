@@ -21,13 +21,7 @@ iree_cc_library(
     "util.c"
   DEPS
     ::alloc
-    iree::base
-    iree::hal
-    iree::hal::local
-    iree::hal::drivers::local_sync::sync_driver
     iree::modules::hal
-    iree::vm
-    iree::vm::shims_emitc
 )
 
 # static library using regular HAL
@@ -58,15 +52,8 @@ iree_cc_library(
     "util.c"
   DEPS
     ::alloc
-    iree::base
-    iree::hal
-    iree::hal::local
-    iree::hal::drivers::local_sync::sync_driver
-    iree::modules::hal
     iree::modules::hal::inline
     iree::modules::hal::loader
-    iree::vm
-    iree::vm::shims_emitc
     samples::device::device_static_loader
   COPTS
     "-DBUILD_LOADER_HAL"
@@ -82,14 +69,7 @@ iree_cc_library(
     "util.c"
   DEPS
     ::alloc
-    iree::base
-    iree::hal
-    iree::hal::local
-    iree::hal::drivers::local_sync::sync_driver
-    iree::modules::hal
     iree::modules::hal::inline
-    iree::vm
-    iree::vm::shims_emitc
     samples::device::device_vmvx_loader
   COPTS
     "-DBUILD_INLINE_HAL"

@@ -17,8 +17,6 @@
 #ifndef SAMPLES_DEVICE_DEVICE_H_
 #define SAMPLES_DEVICE_DEVICE_H_
 
-#include "iree/base/api.h"
-#include "iree/hal/api.h"
 #include "iree/hal/local/executable_loader.h"
 
 // Create the HAL device from the different backend targets.

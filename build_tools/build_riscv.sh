@@ -59,7 +59,7 @@ args=(
   "-B" "${BUILD_RISCV_DIR?}"
   -DCMAKE_TOOLCHAIN_FILE="$(realpath ${ROOT_DIR?}/cmake/riscv_iree.cmake)"
   -DCMAKE_BUILD_TYPE=MinSizeRel
-  -DIREE_HOST_BINARY_ROOT="$(realpath ${BUILD_HOST_DIR?})"
+  -DIREE_HOST_BIN_DIR="$(realpath ${BUILD_HOST_DIR?})/bin"
   -DRISCV_TOOLCHAIN_ROOT="${RISCV_RV32_NEWLIB_TOOLCHAIN_ROOT?}"
 )
 

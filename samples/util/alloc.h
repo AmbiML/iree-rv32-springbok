@@ -17,12 +17,10 @@
 #ifndef SAMPLES_UTIL_ALLOC_H_
 #define SAMPLES_UTIL_ALLOC_H_
 
-#include "iree/base/api.h"
 #include "samples/util/model_api.h"
 
 // Allocate the input buffer w.r.t the model config.
 // The buffer must be released by the external caller.
-iree_status_t alloc_input_buffer(const MlModel *model,
-                                               void **buffer);
+iree_status_t alloc_input_buffer(const MlModel *model, void **buffer);
 
 #endif  // SAMPLES_UTIL_ALLOC_H_
