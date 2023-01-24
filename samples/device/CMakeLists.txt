@@ -20,10 +20,7 @@ iree_cc_library(
   SRCS
     "device_static_loader.c"
   DEPS
-    iree::base
-    iree::hal
     iree::hal::drivers::local_sync::sync_driver
-    iree::hal::local
     iree::hal::local::loaders::static_library_loader
 )
 
@@ -35,9 +32,6 @@ iree_cc_library(
   SRCS
     "device_vmvx_loader.c"
   DEPS
-    iree::base
-    iree::hal
     iree::hal::drivers::local_sync::sync_driver
-    iree::hal::local
     iree::hal::local::loaders::vmvx_module_loader
 )

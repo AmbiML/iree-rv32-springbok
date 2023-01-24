@@ -22,10 +22,6 @@
 
 #include <springbok.h>
 
-#include "iree/base/api.h"
-#include "iree/hal/api.h"
-#include "samples/util/util.h"
-
 // Compiled module embedded here to avoid file IO:
 #include "samples/float_model/mobilenet_input_c.h"
 #if !defined(BUILD_EMITC)
@@ -35,20 +31,6 @@
 #include "samples/float_model/mobilenet_v1_c_module_static_c.h"
 #include "samples/float_model/mobilenet_v1_c_module_static_emitc.h"
 #endif
-
-const MlModel kModel = {
-    .num_input = 1,
-    .num_input_dim = {4},
-    .input_shape = {{1, 224, 224, 3}},
-    .input_length = {224 * 224 * 3},
-    .input_size_bytes = {sizeof(float)},
-    .num_output = 1,
-    .output_length = {1001},
-    .output_size_bytes = sizeof(float),
-    .hal_element_type = IREE_HAL_ELEMENT_TYPE_FLOAT_32,
-    .entry_func = "module.main",
-    .model_name = "mobilenet_v1_0.25_224_float",
-};
 
 MobilenetV1Output score;
 
@@ -67,11 +49,7 @@ iree_status_t create_module(iree_vm_instance_t *instance,
 }
 
 iree_hal_executable_library_query_fn_t library_query(void) {
-#if !defined(BUILD_EMITC)
-  return &mobilenet_v1_bytecode_module_static_linked_llvm_cpu_library_query;
-#else
-  return &mobilenet_v1_c_module_static_linked_llvm_cpu_library_query;
-#endif
+  return &mobilenet_v1_linked_llvm_cpu_library_query;
 }
 
 iree_status_t load_input_data(const MlModel *model, void **buffer,
@@ -84,7 +62,7 @@ iree_status_t load_input_data(const MlModel *model, void **buffer,
 
 iree_status_t process_output(const MlModel *model,
                              iree_hal_buffer_mapping_t *buffers,
-                             MlOutput *output) {
+                             uint32_t *output_length) {
   iree_status_t result = iree_ok_status();
   // find the label index with best prediction
   float best_out = 0.0;
@@ -101,7 +79,6 @@ iree_status_t process_output(const MlModel *model,
 
   LOG_INFO("Image prediction result is: id: %d", best_idx + 1);
 
-  output->result = &score;
-  output->len = sizeof(score);
+  *output_length = sizeof(score);
   return result;
 }

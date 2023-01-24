@@ -14,14 +14,28 @@
  * limitations under the License.
  */
 
-#ifndef SAMPLES_MOBILENETV1_H
-#define SAMPLES_MOBILENETV1_H
+#ifndef SAMPLES_FLOAT_MODEL_MOBILENETV1_H
+#define SAMPLES_FLOAT_MODEL_MOBILENETV1_H
 
-#include <stdint.h>
+#include "samples/util/util.h"
 
 typedef struct {
-    int best_idx;
-    float best_out;
+  int best_idx;
+  float best_out;
 } MobilenetV1Output;
 
-#endif
+const MlModel kModel = {
+    .num_input = 1,
+    .num_input_dim = {4},
+    .input_shape = {{1, 224, 224, 3}},
+    .input_length = {224 * 224 * 3},
+    .input_size_bytes = {sizeof(float)},
+    .num_output = 1,
+    .output_length = {1001},
+    .output_size_bytes = sizeof(float),
+    .hal_element_type = IREE_HAL_ELEMENT_TYPE_FLOAT_32,
+    .entry_func = "module.main",
+    .model_name = "mobilenet_v1_0.25_224_float",
+};
+
+#endif  // SAMPLES_FLOAT_MODEL_MOBILENET_V1_H_

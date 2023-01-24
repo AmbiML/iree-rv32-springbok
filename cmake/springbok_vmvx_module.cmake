@@ -51,7 +51,6 @@ function(springbok_vmvx_module)
     set(_MLIR_SRC "${CMAKE_CURRENT_BINARY_DIR}/${_RULE_NAME}.mlir")
     get_filename_component(_SRC_PATH "${_RULE_SRC}" REALPATH)
     set(_ARGS "${_SRC_PATH}")
-    list(APPEND _ARGS "--output-format=mlir-ir")
     list(APPEND _ARGS "-o")
     list(APPEND _ARGS "${_RULE_NAME}.mlir")
     # Only add the custom_command here. The output is passed to
@@ -68,8 +67,6 @@ function(springbok_vmvx_module)
     )
   endif()
 
-  get_filename_component(_MLIR_SRC "${_MLIR_SRC}" REALPATH)
-  iree_get_executable_path(_COMPILER_TOOL "iree-compile")
   iree_package_name(_PACKAGE_NAME)
   iree_package_ns(_PACKAGE_NS)
 
@@ -83,20 +80,34 @@ function(springbok_vmvx_module)
   endif()
 
   if(_RULE_EMITC)
-    list(APPEND _COMPILER_ARGS "--iree-vm-target-index-bits=32")
     set(_MODULE_NAME "${_RULE_NAME}_emitc")
     set(_H_FILE_NAME "${_RULE_NAME}_emitc.h")
-    iree_c_module(
-      NAME
-        ${_MODULE_NAME}
-      SRC
-        "${_MLIR_SRC}"
-      FLAGS
-        ${_COMPILER_ARGS}
-      H_FILE_OUTPUT
-        "${_H_FILE_NAME}"
-      NO_RUNTIME
+
+    get_filename_component(_MLIR_SRC "${_MLIR_SRC}" REALPATH)
+    list(APPEND _COMPILER_ARGS "--iree-vm-target-index-bits=32")
+    list(APPEND _COMPILER_ARGS "--output-format=vm-c")
+    list(APPEND _COMPILER_ARGS "${_MLIR_SRC}")
+    list(APPEND _COMPILER_ARGS "-o")
+    list(APPEND _COMPILER_ARGS "${_H_FILE_NAME}")
+
+    add_custom_command(
+      OUTPUT ${_H_FILE_NAME}
+      COMMAND iree-compile ${_COMPILER_ARGS}
+      DEPENDS iree-compile ${_MLIR_SRC}
     )
+
+    set(_EMITC_LIB_NAME "${_PACKAGE_NAME}_${_MODULE_NAME}")
+    add_library(${_EMITC_LIB_NAME}
+      ${_H_FILE_NAME}
+    )
+    target_compile_definitions(${_EMITC_LIB_NAME} PUBLIC EMITC_IMPLEMENTATION=\"${_H_FILE_NAME}\")
+    SET_TARGET_PROPERTIES(
+      ${_EMITC_LIB_NAME}
+      PROPERTIES
+        LINKER_LANGUAGE C
+    )
+    add_library(${_PACKAGE_NS}::${_MODULE_NAME} ALIAS ${_EMITC_LIB_NAME})
+
   else()  # bytecode module path
     # Generate the embed data with the bytecode module.
     set(_MODULE_NAME "${_RULE_NAME}")

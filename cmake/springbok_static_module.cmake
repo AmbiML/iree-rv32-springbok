@@ -54,7 +54,6 @@ function(springbok_static_module)
     set(_MLIR_SRC "${CMAKE_CURRENT_BINARY_DIR}/${_RULE_NAME}.mlir")
     get_filename_component(_SRC_PATH "${_RULE_SRC}" REALPATH)
     set(_ARGS "${_SRC_PATH}")
-    list(APPEND _ARGS "--output-format=mlir-ir")
     list(APPEND _ARGS "-o")
     list(APPEND _ARGS "${_RULE_NAME}.mlir")
     # Only add the custom_command here. The output is passed to
@@ -71,8 +70,6 @@ function(springbok_static_module)
     )
   endif()
 
-  get_filename_component(_MLIR_SRC "${_MLIR_SRC}" REALPATH)
-  iree_get_executable_path(_COMPILER_TOOL "iree-compile")
   iree_package_name(_PACKAGE_NAME)
   iree_package_ns(_PACKAGE_NS)
 
@@ -116,8 +113,8 @@ function(springbok_static_module)
 
     add_custom_command(
       OUTPUT ${_OUTPUT_FILES}
-      COMMAND ${_COMPILER_TOOL} ${_COMPILER_ARGS}
-      DEPENDS ${_COMPILER_TOOL} ${_MLIR_SRC}
+      COMMAND iree-compile ${_COMPILER_ARGS}
+      DEPENDS iree-compile ${_MLIR_SRC}
     )
 
     set(_EMITC_LIB_NAME "${_PACKAGE_NAME}_${_MODULE_NAME}")
