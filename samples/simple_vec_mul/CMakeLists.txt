@@ -27,6 +27,7 @@ springbok_modules(
     "samples_simple_vec_mul_simple_float_mul"
   FLAGS
     "-iree-input-type=mhlo"
+    "-riscv-v-fixed-length-vector-lmul-max=8"
   VMVX
   INLINE_HAL
 )
@@ -40,7 +41,6 @@ springbok_modules(
     "samples_simple_vec_mul_simple_int_mul"
   FLAGS
     "-iree-input-type=mhlo"
-    "-riscv-v-vector-bits-min=512"
     "-riscv-v-fixed-length-vector-lmul-max=8"
   VMVX
   INLINE_HAL
@@ -63,7 +63,6 @@ springbok_modules(
 #
 # to increase it.
 
-# TODO(#10810): Only use inline HAL with non-emitc target for now.
 iree_cc_binary(
   NAME
     simple_float_vec_mul_bytecode_vmvx
@@ -85,7 +84,7 @@ iree_cc_binary(
     "float_vec.c"
   DEPS
     ::simple_float_mul_c_module_vmvx_emitc
-    samples::util::util_vmvx
+    samples::util::util_vmvx_inline
   LINKOPTS
     "LINKER:--defsym=__stack_size__=20k"
   COPTS
@@ -122,7 +121,6 @@ iree_cc_binary(
     "-DBUILD_EMITC"
 )
 
-# TODO(#10810): Only use inline HAL with non-emitc target for now.
 iree_cc_binary(
   NAME
     simple_int_vec_mul_bytecode_vmvx
@@ -144,7 +142,7 @@ iree_cc_binary(
     "int_vec.c"
   DEPS
     ::simple_int_mul_c_module_vmvx_emitc
-    samples::util::util_vmvx
+    samples::util::util_vmvx_inline
   LINKOPTS
     "LINKER:--defsym=__stack_size__=20k"
   COPTS

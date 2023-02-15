@@ -120,7 +120,6 @@ function(springbok_modules)
       "${_INPUT_FILENAME}"
   )
 
-  # TODO(#10810): Only add `INLINE_HAL` option to non-emitc target for now.
   if (${_RULE_VMVX})
     springbok_vmvx_module(
       NAME
@@ -143,9 +142,11 @@ function(springbok_modules)
         "${_INPUT_FILENAME}"
       FLAGS
         ${_RULE_FLAGS}
+      "${_INLINE_HAL_ARG}"
       EMITC
       DEPENDS
         "${_INPUT_FILENAME}"
     )
   endif()
+
 endfunction()
