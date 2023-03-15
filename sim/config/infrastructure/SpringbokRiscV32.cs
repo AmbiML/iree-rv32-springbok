@@ -333,20 +333,22 @@ namespace Antmicro.Renode.Peripherals.CPU
                             Machine.LocalTimeSource.ExecuteInNearestSyncedState( __ => {
                                 if (InitMemSelect.Value)
                                 {
-                                    for(long writeAddress = InitStartAddress.Value & ~(InstructionPageSize - 1);
-                                writeAddress < ((InitEndAddress.Value + InstructionPageSize - 1) & ~(InstructionPageSize - 1));
-                                writeAddress += InstructionPageSize)
+                                    var instructionPageMask = ~((ulong)(InstructionPageSize - 1));
+                                    for(ulong writeAddress = InitStartAddress.Value & instructionPageMask;
+                                        writeAddress < ((InitEndAddress.Value + InstructionPageSize - 1) & instructionPageMask);
+                                        writeAddress += InstructionPageSize)
                                     {
-                                        IMem.WriteBytes(writeAddress, InstructionErasePattern, 0, InstructionPageSize);
+                                        IMem.WriteBytes((long)writeAddress, InstructionErasePattern, 0, InstructionPageSize);
                                     }
                                 }
                                 else
                                 {
-                                    for(long writeAddress = InitStartAddress.Value & ~(DataPageSize - 1);
-                                writeAddress < ((InitEndAddress.Value + DataPageSize - 1) & ~(DataPageSize - 1));
-                                writeAddress += DataPageSize)
+                                    var dataPageMask = ~((ulong)(DataPageSize - 1));
+                                    for(ulong writeAddress = InitStartAddress.Value & dataPageMask;
+                                        writeAddress < ((InitEndAddress.Value + DataPageSize - 1) & dataPageMask);
+                                        writeAddress += DataPageSize)
                                     {
-                                        DMem.WriteBytes(writeAddress, DataErasePattern, 0, DataPageSize);
+                                        DMem.WriteBytes((long)writeAddress, DataErasePattern, 0, DataPageSize);
                                     }
                                 }
                                 InitStatusPending.Value = false;
